@@ -5,8 +5,20 @@
 #include <unordered_map>
 using namespace std;
 
+bool format_check_insert(string s){
+    int n = s.size();
+    if(n != 39) return false;
+    for(int i = 0; i < n; i++){
+        if(i % 5 == 4){
+            if(s[i] != '-') return false;
+            continue;
+        }
+        if((i < 15 && !isupper(s[i])) || (i >= 15 && !isdigit(s[i]))) return false;
+    }
+    return true;
+}
+
 int main(void){
-    cout << "111" << endl;
     string mode;
     cout << "mode:";
     cin >> mode;
@@ -22,7 +34,6 @@ int main(void){
             cout << "EOF" << endl;
             return 1;
         }
-        cout << "111:" << password << ":111" << endl;
         if(password == "123456"){
             cout << "Create a password:" << endl;
             cin >> password;
@@ -42,11 +53,37 @@ int main(void){
             cout << "wrog password" << ":" << password << endl;
             return 1;
         }
-        cout << "ROOT MODE, PLEASE ENTER COMMAND" << endl;
         while(1){
+            cout << "ROOT MODE, PLEASE ENTER COMMAND" << endl;
             string cmd;
             cin >> cmd;
-            if(cmd == "abort") break;
+            if(cmd == "q") break;
+            else if(cmd == "passwort"){
+                cout << "New a password:" << endl;
+                cin >> password;
+                system("cls");
+                password_file.close();
+                password_file.open("password.txt", ios::out | ios::trunc);
+                password_file << password;
+                password_file.close();
+            }
+            else if(cmd == "insert"){
+                while(1)
+                {
+                    cout << "new info:" << endl;
+                    string new_info;
+                    cin >> new_info;
+                    if(new_info == "q") break;
+                    if(!format_check_insert(new_info)){
+                        cout << "format wrong" << endl;
+                        continue;
+                    }
+                    fstream information_file;
+                    information_file.open("information.txt", ios::out | ios::in);
+                    information_file << new_info << endl;
+                    information_file.close();
+                }
+            }
         }
     }
     else{
