@@ -19,6 +19,7 @@ int main(void){
         cout << "root mode" << endl;
         bool ret_flag;
         int ret_val = root(ret_flag);
+        system("cls");
         if(ret_flag) return ret_val;
     }
     else if(mode == "user"){
@@ -46,8 +47,11 @@ int root(bool &root_ret_flag){
         if(cmd == "quit"){
             bool ret_flag;
             int ret_val = quit(ret_flag);
-            if (ret_flag)
-                return ret_val;
+            if(ret_flag) return ret_val;
+            else{
+                root_ret_flag = false;
+                return 0;
+            }
         }
         else if(cmd == "help") help();
         else if(cmd == "save") save();
@@ -99,9 +103,15 @@ int quit(bool &ret_flag){
                     system("cls");
                     print();
                     if(confirm == "yes") continue;
-                    else return 0;
+                    else{              
+                        ret_flag = false;
+                        return 0;
+                    }
                 }
-                else return 0;
+                else{
+                    ret_flag = false;
+                    return 0;
+                }
             }
         }
         else if(confirm == "no") break;
@@ -385,13 +395,12 @@ void modify(int &ret_flag){
         system("cls");
         print();
         modify_particular(target, modify_info, ret_flag, 0);
+        return;
     }
     if(!format_check_insert(modify_info)){
         cout << "format wrong" << endl;
-        {
-            ret_flag = 3;
-            return;
-        };
+        ret_flag = 3;
+        return;
     }
     string index = modify_info.substr(0, 4);
     if(info_table.find(index) == info_table.end()){
@@ -459,9 +468,47 @@ void modify_particular(std::__cxx11::string &target, std::__cxx11::string &modif
         int part_index = info_table[modify_info];
         cout << "Enter new value for " << target << ":" << endl;
         string new_value;
-        cin >> new_value;
-        system("cls");
-        print();
+        while(1){
+            cin >> new_value;
+            if(target == "from" || target == "to" || target == "getoff" || target == "arrive"){
+                if(new_value.size() != 4){
+                    cout << "Invalid input, please enter again:" << endl;
+                    continue;
+                }
+                bool flag = true;
+                for(int i = 0; i < 4; i++){
+                    if(!isupper(new_value[i])){
+                        flag = false;
+                        break;
+                    }
+                }
+                if(!flag){
+                    cout << "Invalid input, please enter again:" << endl;
+                    continue;
+                }
+                else break;
+            }
+            else{
+                if(new_value.size() != 4){
+                    cout << "Invalid input, please enter again:" << endl;
+                    continue;
+                }
+                bool flag = true;
+                for(int i = 0; i < 4; i++){
+                    if(!isdigit(new_value[i])){
+                        flag = false;
+                        break;
+                    }
+                }
+                if(!flag){
+                    cout << "Invalid input, please enter again:" << endl;
+                    continue;
+                }
+                else break;
+            }
+            system("cls");
+            print();
+        }
         while(true){
             cout << "Are you sure to modify: " << endl << endl;
             for(int i = 0; i < 8; i++){
@@ -470,14 +517,14 @@ void modify_particular(std::__cxx11::string &target, std::__cxx11::string &modif
             }
             cout << endl << endl << "to: " << endl << endl;
             for(int i = 0; i < 8; i++){
-                if(i == flight) cout << info[part_index][i];
-                else if(i == flight + 1) cout << info[part_index][i];
-                else if(i == flight + 2) cout << info[part_index][i];
-                else if(i == flight + 3) cout << info[part_index][i];
-                else if(i == flight + 4) cout << info[part_index][i];
-                else if(i == flight + 5) cout << info[part_index][i];
-                else if(i == flight + 6) cout << info[part_index][i];
-                else if(i == flight + 7) cout << info[part_index][i];
+                if(i == flight + 1 && target == "from") cout << new_value;
+                else if(i == flight + 2 && target == "to") cout << new_value;
+                else if(i == flight + 3 && target == "getoff") cout << new_value;
+                else if(i == flight + 4 && target == "arrive") cout << new_value;
+                else if(i == flight + 5 && target == "discount") cout << new_value;
+                else if(i == flight + 6 && target == "price") cout << new_value;
+                else if(i == flight + 7 && target == "empty") cout << new_value;
+                else cout << info[part_index][i];
                 if(i < 7) cout << "-";
             }
             cout << endl << endl << " ? (yes/no)" << endl;
@@ -500,6 +547,8 @@ void modify_particular(std::__cxx11::string &target, std::__cxx11::string &modif
         else if(target == "discount") info[part_index][5] = new_value;
         else if(target == "price") info[part_index][6] = new_value;
         else if(target == "empty") info[part_index][7] = new_value;
+        system("cls");
+        print();
         cout << "Modification successful" << endl;
         ret_flag = 0;
     }
