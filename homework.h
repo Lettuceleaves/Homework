@@ -28,6 +28,8 @@ void insert();
 
 void modify(int &retFlag);
 
+void modify_particular(std::__cxx11::string &target, std::__cxx11::string &modify_info, int &ret_flag, int mode);
+
 void print();
 
 void shell_sort_info();

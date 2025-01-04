@@ -54,7 +54,10 @@ int root(bool &root_ret_flag){
         else if(cmd == "password"){
             bool ret_flag;
             int ret_val = password_block(password, password_file, ret_flag);
-            if (ret_flag) return ret_val;
+            if(ret_flag){
+                system("cls");
+                return ret_val;
+            }
         }
         else if(cmd == "template") cout << "AAAA-AAAA-AAAA-1111-1111-1111-1111-1111" << endl;
         else if(cmd == "insert") insert();
@@ -73,6 +76,7 @@ int root(bool &root_ret_flag){
         }
     }
     root_ret_flag = false;
+    system("cls");
     return 0;
 }
 
@@ -143,10 +147,34 @@ void delete_operation(){
     }
 }
 
-int user(bool &root_ret_flag)
-{
+int user(bool &root_ret_flag){
     root_ret_flag = true;
     bool ret_flag;
+    cout << "Please enter your ID number:" << endl;
+    string id_number;
+    cin >> id_number;
+    system("cls");
+    fstream user_file;
+    user_file.open(id_number + ".txt", ios::in);
+    if(!user_file.is_open()){
+        while(1){
+            user_file.open(id_number + ".txt", ios::out);
+            if(!user_file.is_open()){
+                cout << "Could not open or create file: " << id_number << ".txt" << endl;
+                cout << "Try again?(yes/no)" << endl;
+                string comfirm;
+                cin >> comfirm;
+                system("cls");
+                if(comfirm == "yes") continue;
+                else if(comfirm == "no") return 1;
+                else{
+                    cout << "Invalid input" << endl;
+                    continue;
+                }
+            }
+        }
+    }
+    user_file.close();
     while(1){
         cout << "USER MODE, PLEASE ENTER COMMAND(print \"help\" to check command)" << endl;
         string cmd;
@@ -211,45 +239,47 @@ void help(){
     cout << "modify: modify information" << endl;
 }
 
-int password_block(string &password, fstream &password_file, bool &ret_flag)
-{
+int password_block(string &password, fstream &password_file, bool &ret_flag){
     ret_flag = true;
-    while (1)
-    {
+    while(1){
         bool success_set_flag = false;
         cout << "Enter the current password:" << endl;
         string current_password;
         cin >> current_password;
         system("cls");
-        if (current_password == "quit")
-            break;
-        if (current_password != password)
-        {
+        if (current_password == "quit") break;
+        if (current_password != password){
             cout << "Wrong password, try again or type 'quit' to cancel" << endl;
             continue;
         }
         print();
         cout << "New a password:" << endl;
-        while (true)
-        {
+        while(true){
             cout << "Enter new password:" << endl;
             string new_password1, new_password2;
             cin >> new_password1;
             system("cls");
             print();
-            if (new_password1 == "quit")
-                break;
+            if(new_password1 == "quit") break;
             cout << "Confirm new password:" << endl;
             cin >> new_password2;
             system("cls");
             print();
-            if (new_password1 == new_password2)
-            {
+            if(new_password1 == new_password2){
                 password = new_password1;
                 password_file.close();
-                password_file.open("password.txt", ios::out | ios::trunc);
-                if (!password_file.is_open())
-                    return -1;
+                while(1){
+                    password_file.open("password.txt", ios::out | ios::trunc);
+                    if(!password_file.is_open()){
+                        cout << "Could not open file: password.txt";
+                        cout << "Try again?(yes/no)" << endl;
+                        string comfirm;
+                        cin >> comfirm;
+                        if(comfirm == "yes") continue;
+                        else return 1;
+                    }
+                    else break;
+                }
                 password_file << password;
                 password_file.close();
                 cout << "Password changed successfully" << endl;
@@ -261,7 +291,7 @@ int password_block(string &password, fstream &password_file, bool &ret_flag)
         if(success_set_flag) break;
     }
     ret_flag = false;
-    return {};
+    return 0;
 }
 
 int save(){
@@ -337,8 +367,7 @@ void shell_sort_info() {
     }
 }
 
-void modify(int &ret_flag)
-{
+void modify(int &ret_flag){
     ret_flag = 1;
     cout << "Enter info to modify(\"quit\" to break):" << endl;
     string modify_info;
@@ -349,6 +378,14 @@ void modify(int &ret_flag)
         ret_flag = 1;
         return;
     }
+    else if(info_table.find(modify_info) != info_table.end()){
+        string target;
+        cout << "Which part do you want to modify?" << endl;
+        cin >> target;
+        system("cls");
+        print();
+        modify_particular(target, modify_info, ret_flag, 0);
+    }
     if(!format_check_insert(modify_info)){
         cout << "format wrong" << endl;
         {
@@ -358,7 +395,7 @@ void modify(int &ret_flag)
     }
     string index = modify_info.substr(0, 4);
     if(info_table.find(index) == info_table.end()){
-        cout << "Are you sure to add? (yes/no)" << endl;
+        cout << "Are you sure to add: " + modify_info + " ? (yes/no)" << endl;
         string confirm;
         while(1){
             cin >> confirm;
@@ -386,7 +423,12 @@ void modify(int &ret_flag)
         }
     }
     else{
-        cout << "Are you sure to modify? (yes/no)" << endl;
+        cout << "Are you sure to modify:" << endl << endl;
+        for (int i = 0; i < 8; i++) {
+            cout << info[info_table[index]][i];
+            if (i < 7) cout << "-";
+        }
+        cout << endl << endl << " to: " << endl << endl << modify_info << endl << endl << " ? (yes/no)" << endl;
         string confirm;
         while(true){
             cin >> confirm;
@@ -408,6 +450,65 @@ void modify(int &ret_flag)
     }
 }
 
+void modify_particular(std::__cxx11::string &target, std::__cxx11::string &modify_info, int &ret_flag, int mode){
+    if(target == "from" || target == "to" || target == "getoff" || target == "arrive" || target == "discount" || target == "price" || target == "empty"){
+        if(mode == 1 && target != "empty"){
+            ret_flag = 3;
+            return;
+        }
+        int part_index = info_table[modify_info];
+        cout << "Enter new value for " << target << ":" << endl;
+        string new_value;
+        cin >> new_value;
+        system("cls");
+        print();
+        while(true){
+            cout << "Are you sure to modify: " << endl << endl;
+            for(int i = 0; i < 8; i++){
+                cout << info[part_index][i];
+                if(i < 7) cout << "-";
+            }
+            cout << endl << endl << "to: " << endl << endl;
+            for(int i = 0; i < 8; i++){
+                if(i == flight) cout << info[part_index][i];
+                else if(i == flight + 1) cout << info[part_index][i];
+                else if(i == flight + 2) cout << info[part_index][i];
+                else if(i == flight + 3) cout << info[part_index][i];
+                else if(i == flight + 4) cout << info[part_index][i];
+                else if(i == flight + 5) cout << info[part_index][i];
+                else if(i == flight + 6) cout << info[part_index][i];
+                else if(i == flight + 7) cout << info[part_index][i];
+                if(i < 7) cout << "-";
+            }
+            cout << endl << endl << " ? (yes/no)" << endl;
+            string confirm;
+            cin >> confirm;
+            system("cls");
+            print();
+            if(confirm == "yes") break;
+            else if(confirm == "no"){
+                cout << "Modification cancelled" << endl;
+                ret_flag = 3;
+                return;
+            }
+            else cout << "Invalid input, please enter again (yes/no):" << endl;
+        }
+        if(target == "from") info[part_index][1] = new_value;
+        else if(target == "to") info[part_index][2] = new_value;
+        else if(target == "getoff") info[part_index][3] = new_value;
+        else if(target == "arrive") info[part_index][4] = new_value;
+        else if(target == "discount") info[part_index][5] = new_value;
+        else if(target == "price") info[part_index][6] = new_value;
+        else if(target == "empty") info[part_index][7] = new_value;
+        cout << "Modification successful" << endl;
+        ret_flag = 0;
+    }
+    else{
+        cout << "Invalid part specified" << endl;
+        ret_flag = 3;
+    }
+}
+
 void print(){
     cout << "+--------+------+-------+-------+-------+--------+-------+-------+" << endl;
     cout << "| flight | from |  to   | getoff| arrive|discount| price | empty |" << endl;
@@ -418,7 +519,7 @@ void print(){
         cout << " " << row[2] << "  |";
         cout << " " << row[3] << "  |";
         cout << " " << row[4] << "  |";
-        cout << " " << row[5] << "   |";
+        cout << "  " << row[5] << "  |";
         cout << " " << row[6] << "  |";
         cout << " " << row[7] << "  |";
         cout << endl;
@@ -447,5 +548,7 @@ void insert(){
         info_table[temp[0]] = info.size();
         info.push_back(temp);
         shell_sort_info();
+        system("cls");
+        print();
     }
 }
