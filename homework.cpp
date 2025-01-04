@@ -1,9 +1,11 @@
 #include "homework.h"
 
 enum{flight, from, to, getoff, arrive, discount, price, empty};
+enum{username};
 
 unordered_map<string, int> info_table;
 vector<vector<string>> info(0, vector<string>(8));
+vector<string> ticket;
 
 int main(void){
     if(!init()){
@@ -25,7 +27,7 @@ int main(void){
     else if(mode == "user"){
         cout << "user mode" << endl;
         bool ret_flag;
-        int ret_val = root(ret_flag);
+        int ret_val = user(ret_flag);
         if(ret_flag) return ret_val;
     }
     else cout << "mode wrong" << endl;
@@ -183,6 +185,14 @@ int user(bool &root_ret_flag){
                 }
             }
         }
+    }
+    string line;
+    while(getline(user_file, line)){
+        if(line.length() != 4 || info_table.find(line) == info_table.end()){
+            cout << "error, please get in touch with assistance" << endl;
+            return 1;
+        }
+        else ticket.push_back(line);
     }
     user_file.close();
     while(1){

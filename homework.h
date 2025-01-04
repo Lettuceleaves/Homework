@@ -33,3 +33,5 @@ void modify_particular(std::__cxx11::string &target, std::__cxx11::string &modif
 void print();
 
 void shell_sort_info();
+
+int user(bool &root_ret_flag);
