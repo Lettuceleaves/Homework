@@ -30,8 +30,7 @@ int main(void){
     else cout << "mode wrong" << endl;
 }
 
-int root(bool &root_ret_flag)
-{
+int root(bool &root_ret_flag){
     root_ret_flag = true;
     bool ret_flag;
     fstream password_file;
@@ -45,9 +44,10 @@ int root(bool &root_ret_flag)
         system("cls");
         print();
         if(cmd == "quit"){
-            int ret_flag;
-            quit(ret_flag);
-            if(ret_flag == 2) break;
+            bool ret_flag;
+            int ret_val = quit(ret_flag);
+            if (ret_flag)
+                return ret_val;
         }
         else if(cmd == "help") help();
         else if(cmd == "save") save();
@@ -66,39 +66,7 @@ int root(bool &root_ret_flag)
                 else if(ret_flag == 1) break;
             }
         }
-        else if(cmd == "delete"){
-            while(1){
-                cout << "Enter flight number to delete(\"quit\" to break):" << endl;
-                string flight_number;
-                cin >> flight_number;
-                system("cls");
-                print();
-                if(flight_number == "quit") break;
-                if(info_table.find(flight_number) == info_table.end()){
-                    cout << "The flight does not exist" << endl;
-                    continue;
-                }
-                cout << "Are you sure to delete? (yes/no)" << endl;
-                string confirm;
-                while(1){
-                    cin >> confirm;
-                    system("cls");
-                    print();
-                    if(confirm == "yes"){
-                        info.erase(info.begin() + info_table[flight_number]);
-                        info_table.erase(flight_number);
-                        shell_sort_info();
-                        cout << "info deleted" << endl;
-                        break;
-                    }
-                    else if(confirm == "no"){
-                        cout << "deletion cancelled" << endl;
-                        break;
-                    }
-                    else cout << "Invalid input, please enter again (yes/no):" << endl;
-                }
-            }
-        }
+        else if(cmd == "delete") delete_operation();
         else{
             cout << "Invalid command" << endl;
             continue;
@@ -106,6 +74,71 @@ int root(bool &root_ret_flag)
     }
     root_ret_flag = false;
     return 0;
+}
+
+int quit(bool &ret_flag){
+    ret_flag = true;
+    while(1){
+        cout << "Are you sure to quit? (yes/no)" << endl;
+        string confirm;
+        cin >> confirm;
+        system("cls");
+        print();
+        if(confirm == "yes"){
+            while(1){
+                int ret_val = save();
+                if(ret_val){
+                    cout << "save failed" << endl;
+                    cout << "Try to save again? (yes/no)" << endl;
+                    string confirm;
+                    cin >> confirm;
+                    system("cls");
+                    print();
+                    if(confirm == "yes") continue;
+                    else return 0;
+                }
+                else return 0;
+            }
+        }
+        else if(confirm == "no") break;
+        else cout << "Invalid input, please enter again (yes/no):" << endl;
+    }
+    ret_flag = false;
+    return 0;
+}
+
+void delete_operation(){
+    while (1){
+        cout << "Enter flight number to delete(\"quit\" to break):" << endl;
+        string flight_number;
+        cin >> flight_number;
+        system("cls");
+        print();
+        if(flight_number == "quit") break;
+        if(info_table.find(flight_number) == info_table.end()){
+            cout << "The flight does not exist" << endl;
+            continue;
+        }
+        cout << "Are you sure to delete? (yes/no)" << endl;
+        string confirm;
+        while(1){
+            cin >> confirm;
+            system("cls");
+            print();
+            if(confirm == "yes"){
+                info.erase(info.begin() + info_table[flight_number]);
+                info_table.erase(flight_number);
+                shell_sort_info();
+                cout << "info deleted" << endl;
+                break;
+            }
+            else if(confirm == "no"){
+                cout << "deletion cancelled" << endl;
+                break;
+            }
+            else cout << "Invalid input, please enter again (yes/no):" << endl;
+        }
+    }
 }
 
 int user(bool &root_ret_flag)
@@ -166,31 +199,6 @@ int check_in(bool &ret_flag, fstream& password_file, string& password){
     print();
     ret_flag = false;
     return {};
-}
-
-void quit(int &ret_flag)
-{
-    ret_flag = 1;
-
-    fstream information_file;
-    information_file.open("information.txt", ios::out | ios::trunc);
-    for (const auto &row : info)
-    {
-        for (int i = 0; i < 8; i++)
-        {
-            information_file << row[i];
-            if (i < 7)
-                information_file << "-";
-        }
-        information_file << endl;
-    }
-    information_file.close();
-    system("cls");
-    print();
-    {
-        ret_flag = 2;
-        return;
-    };
 }
 
 void help(){
@@ -254,11 +262,14 @@ int password_block(string &password, fstream &password_file, bool &ret_flag)
     return {};
 }
 
-void save()
-{
+int save(){
     fstream information_file;
     information_file.open("information.txt", ios::out | ios::trunc);
-    if 
+    if(!information_file.is_open()){
+        cout << "Could not open file: information.txt";
+        return 1;
+    }
+    shell_sort_info();
     for(const auto &row : info){
         for(int i = 0; i < 8; i++){
             information_file << row[i];
@@ -269,6 +280,7 @@ void save()
     information_file.close();
     system("cls");
     print();
+    return 0;
 }
 
 bool format_check_insert(string s){

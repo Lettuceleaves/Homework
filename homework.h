@@ -8,17 +8,19 @@ using namespace std;
 
 bool format_check_insert(string s);
 
-void save();
+int save();
 
 int password_block(string &password, fstream &password_file, bool &retFlag);
 
 void help();
 
-void quit(int &retFlag);
-
 int check_in(bool &retFlag, fstream &password_file, string &password);
 
 int root(bool &retFlag);
+
+int quit(bool &retFlag);
+
+void delete_operation();
 
 bool init();
 
