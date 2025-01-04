@@ -191,6 +191,15 @@ int user(bool &root_ret_flag){
         cin >> cmd;
         system("cls");
         print();
+        if(cmd == "quit"){
+            bool ret_flag;
+            int ret_val = quit(ret_flag);
+            if(ret_flag) return ret_val;
+            else{
+                root_ret_flag = false;
+                return 0;
+            }
+        }
     }
     root_ret_flag = false;
     return 0;
