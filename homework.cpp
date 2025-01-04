@@ -129,6 +129,8 @@ void delete_operation(){
                 info.erase(info.begin() + info_table[flight_number]);
                 info_table.erase(flight_number);
                 shell_sort_info();
+                system("cls");
+                print();
                 cout << "info deleted" << endl;
                 break;
             }
