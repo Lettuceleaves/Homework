@@ -2,12 +2,12 @@
 
 enum{flight, from, to, getoff, arrive, discount, price, empty};
 
-unordered_map<string, int> info_table;
 vector<vector<string>> info(0, vector<string>(8));
-vector<string> ticket;
-vector<vector<int>> dist;
+unordered_map<string, int> info_table;
 unordered_map<string, int> location;
 vector<vector<string>> flight_table;
+vector<vector<int>> dist;
+vector<string> ticket;
 string id_number;
 int bill_length;
 
