@@ -51,6 +51,8 @@ int root(bool &ret_flag);
 
 int save(int mode);
 
+int save_deal(string f, int mode);
+
 void shell_sort_info();
 
 int user(bool &root_ret_flag);

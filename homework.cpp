@@ -9,6 +9,7 @@ vector<vector<int>> dist;
 unordered_map<string, int> location;
 vector<vector<string>> flight_table;
 string id_number;
+int bill_length;
 
 int main(void){
     if(!init()){
@@ -63,6 +64,7 @@ int book(){
                     return 0;
                 }
                 ticket.push_back(flight_number);
+                save_deal(flight_number, 1);
                 system("cls");
                 print(1);
                 cout << "booked" << endl;
@@ -220,6 +222,7 @@ void delete_user(){
             if(confirm == "yes"){
                 info.erase(info.begin() + info_table[flight_number]);
                 info_table.erase(flight_number);
+                save_deal(flight_number, 0);
                 shell_sort_info();
                 system("cls");
                 print(1);
@@ -760,6 +763,30 @@ int save(int mode){
             cout << "Could not open file: " + id_number + ".txt";
             return 1;
         }
+        fstream deal_file;
+        deal_file.open("deal.txt", ios::in | ios::out);
+        if (!deal_file.is_open()) {
+            cout << "Could not open file: deal.txt";
+            return 1;
+        }
+        vector<string> lines;
+        string line;
+        while (getline(deal_file, line)) {
+            lines.push_back(line);
+        }
+        deal_file.close();
+        deal_file.open("deal.txt", ios::out | ios::trunc);
+        if (!deal_file.is_open()) {
+            cout << "Could not open file: deal.txt";
+            return 1;
+        }
+        for (int i = 0; i < lines.size(); ++i) {
+            if (i >= bill_length && lines[i].find("not completed") != string::npos) {
+            lines[i].replace(lines[i].find("not completed"), 13, "completed");
+            }
+            deal_file << lines[i] << endl;
+        }
+        deal_file.close();
         for(const auto &row : ticket){
             user_file << row << endl;
         }
@@ -767,6 +794,44 @@ int save(int mode){
     }
     system("cls");
     print(mode);
+    return 0;
+}
+
+int save_deal(string f, int mode){
+    fstream deal_file;
+    deal_file.open("deal.txt", ios::in);
+    if (!deal_file.is_open()) {
+        cout << "Could not open file: deal.txt";
+        return 1;
+    }
+    string deal_string;
+    set<string> deal_set;
+    while (deal_file >> deal_string) {
+        istringstream iss(deal_string);
+        string first_word;
+        iss >> first_word;
+        deal_set.insert(first_word);
+    }
+    string new_deal;
+    do {
+        new_deal = "";
+        for (int i = 0; i < 10; ++i) {
+            new_deal += 'A' + rand() % 26;
+        }
+    } while (deal_set.find(new_deal) != deal_set.end());
+    deal_file << new_deal;
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    deal_file << " " << id_number << " " << f << " " << info[info_table[f]][from] << " " << info[info_table[f]][to] << " " << info[info_table[f]][getoff] << " " << info[info_table[f]][arrive] << " " << info[info_table[f]][price] << " " 
+              << 1900 + ltm->tm_year << "-" << 1 + ltm->tm_mon << "-" << ltm->tm_mday;
+    if(mode == 1){
+        deal_file << "build" << " ";
+    }
+    else{
+        deal_file << "cancel" << " ";
+    }
+    deal_file << "not completed" << endl;
+    deal_file.close();
     return 0;
 }
 
@@ -823,6 +888,14 @@ int user(bool &root_ret_flag){
     }
     user_file.close();
     floyd(info.size());
+    fstream deal_file;
+    deal_file.open("deal.txt", ios::in);
+    if (!deal_file.is_open()) {
+        cout << "Could not open file: deal.txt";
+        return 1;
+    }
+    bill_length = count(istreambuf_iterator<char>(deal_file), istreambuf_iterator<char>(), '\n');
+    deal_file.close();
     print(1);
     while(1){
         cout << "USER MODE, PLEASE ENTER COMMAND(print \"help\" to check command)" << endl;
