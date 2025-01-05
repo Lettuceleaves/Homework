@@ -7,6 +7,8 @@ unordered_map<string, int> info_table;
 vector<vector<string>> info(0, vector<string>(8));
 vector<string> ticket;
 vector<vector<int>> dist;
+unordered_map<string, int> location;
+vector<vector<string>> flight_table;
 
 int main(void){
     if(!init()){
@@ -66,6 +68,7 @@ int book(){
             else cout << "Invalid input, please enter again (yes/no):" << endl;
         }
     }
+    return 0;
 }
 
 int check_in(bool &ret_flag, fstream& password_file, string& password){
@@ -149,11 +152,33 @@ void delete_operation(){
     }
 }
 
+void destination(){
+    unordered_map<string, set<string>> adj_list;
+    for(const auto &row : info){
+        adj_list[row[from]].insert(row[to]);
+    }
+    flight_table.clear();
+    for(const auto &entry : adj_list){
+        vector<string> destinations(entry.second.begin(), entry.second.end());
+        flight_table.push_back({entry.first});
+        flight_table.back().insert(flight_table.back().end(), destinations.begin(), destinations.end());
+    }
+    sort(flight_table.begin(), flight_table.end());
+}
+
 void floyd(int v){
     dist = vector<vector<int>>(v, vector<int>(v, INT_MAX));
+    for (const auto &row : info) {
+        if (location.find(row[from]) == location.end()) {
+            location[row[from]] = location.size();
+        }
+        if (location.find(row[to]) == location.end()) {
+            location[row[to]] = location.size();
+        }
+    }
     for(const auto &row : info){
-        int u = info_table[row[from]];
-        int v = info_table[row[to]];
+        int u = location[row[from]];
+        int v = location[row[to]];
         int weight = stoi(row[price]);
         dist[u][v] = weight;
     }
@@ -164,6 +189,13 @@ void floyd(int v){
                 if(dist[i][k] != INT_MAX && dist[k][j] != INT_MAX && dist[i][k] + dist[k][j] < dist[i][j]){
                     dist[i][j] = dist[i][k] + dist[k][j];
                 }
+            }
+        }
+    }
+    for(int i = 0; i < v; ++i){
+        for(int j = 0; j < v; ++j){
+            if(dist[i][j] == INT_MAX){
+                dist[i][j] = 0;
             }
         }
     }
@@ -499,25 +531,35 @@ void print(int mode){
     if(mode == 1) print_dist();
 }
 
-void print_dist() {
-    cout << "+--------+";
-    for(const auto& entry : info_table) cout << " " << entry.first << " |";
+void print_dist(){
+    cout << "+--------------+";
+    for(size_t i = 0; i < dist.size(); ++i) cout << " " << setw(12) << info[i][from] << " |";
     cout << endl;
-    cout << "+--------+";
-    for(size_t i = 0; i < info_table.size(); ++i) cout << "-------+";
+    cout << "+--------------+";
+    for(size_t i = 0; i < dist.size(); ++i) cout << "--------------+";
     cout << endl;
-    for(const auto& entry : info_table){
-        cout << "| " << entry.first << " |";
-        int u = entry.second;
-        for(size_t v = 0; v < info_table.size(); ++v){
-            if(dist[u][v] == INT_MAX) cout << "  INF  |";
-            else cout << setw(5) << dist[u][v] << " |";
+    for(size_t i = 0; i < dist.size(); ++i){
+        cout << "| " << setw(12) << info[i][from] << " |";
+        for(size_t j = 0; j < dist.size(); ++j){
+            if(dist[i][j] == INT_MAX) cout << "     INF      |";
+            else cout << " " << setw(12) << dist[i][j] << " |";
         }
         cout << endl;
-        cout << "+--------+";
-        for(size_t i = 0; i < info_table.size(); ++i) cout << "-------+";
+        cout << "+--------------+";
+        for(size_t i = 0; i < dist.size(); ++i) cout << "--------------+";
         cout << endl;
     }
+}
+
+void print_flight(string start){
+    bool found = false;
+    for(const auto &row : info){
+        if(row[from] == start){
+            cout << "Flight: " << row[flight] << ", Destination: " << row[to] << endl;
+            found = true;
+        }
+    }
+    if(!found) cout << "No flights found from " << start << endl;
 }
 
 int quit(bool &ret_flag, int mode){
@@ -697,6 +739,7 @@ int user(bool &root_ret_flag){
     }
     user_file.close();
     floyd(info.size());
+    print(1);
     while(1){
         cout << "USER MODE, PLEASE ENTER COMMAND(print \"help\" to check command)" << endl;
         string cmd;
@@ -730,6 +773,20 @@ int user(bool &root_ret_flag){
         }
         else if(cmd == "book"){
             if(book()) return 1;
+        }
+        else if(cmd == "help") help_user();
+        else if(cmd == "destination"){
+            destination();
+            cout << "Enter the starting location:" << endl;
+            string start;
+            cin >> start;
+            system("cls");
+            print(1);
+            print_flight(start);
+        }
+        else{
+            cout << "Invalid command" << endl;
+            continue;
         }
     }
     root_ret_flag = false;

@@ -69,5 +69,6 @@
       "list": "cpp"
     },
     "editor.suggest.snippetsPreventQuickSuggestions": false,
-    "aiXcoder.showTrayIcon": true
+    "aiXcoder.showTrayIcon": true,
+    "C_Cpp.errorSquiggles": "disabled"
   }

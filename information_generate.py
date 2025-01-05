@@ -10,5 +10,5 @@ def generate_string():
     return '-'.join(parts)
 
 with open('information.txt', 'w') as file:
-    for _ in range(8):
+    for _ in range(4):
         file.write(generate_string() + '\n')

@@ -4,6 +4,8 @@
 #include <string>
 #include <unordered_map>
 #include <iomanip>
+#include <algorithm>
+#include <set>
 using namespace std;
 
 int book();
@@ -11,6 +13,8 @@ int book();
 int check_in(bool &retFlag, fstream &password_file, string &password);
 
 void delete_operation();
+
+void destination();
 
 void floyd(int v);
 
@@ -22,15 +26,19 @@ void insert();
 
 void help();
 
+void help_user();
+
 void modify(int &retFlag);
 
-void modify_particular(std::__cxx11::string &target, std::__cxx11::string &modify_info, int &ret_flag, int mode);
+void modify_particular(string &target, string &modify_info, int &ret_flag, int mode);
 
 int password_block(string &password, fstream &password_file, bool &retFlag);
 
 void print(int mode);
 
 void print_dist();
+
+void print_flight(string start);
 
 int quit(bool &retFlag, int mode);
 
