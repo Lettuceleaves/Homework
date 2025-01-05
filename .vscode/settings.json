@@ -65,7 +65,8 @@
       "memory_resource": "cpp",
       "optional": "cpp",
       "string_view": "cpp",
-      "iomanip": "cpp"
+      "iomanip": "cpp",
+      "list": "cpp"
     },
     "editor.suggest.snippetsPreventQuickSuggestions": false,
     "aiXcoder.showTrayIcon": true
