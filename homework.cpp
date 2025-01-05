@@ -1,7 +1,6 @@
 #include "homework.h"
 
 enum{flight, from, to, getoff, arrive, discount, price, empty};
-enum{username};
 
 unordered_map<string, int> info_table;
 vector<vector<string>> info(0, vector<string>(8));
@@ -9,6 +8,7 @@ vector<string> ticket;
 vector<vector<int>> dist;
 unordered_map<string, int> location;
 vector<vector<string>> flight_table;
+string id_number;
 
 int main(void){
     if(!init()){
@@ -55,6 +55,13 @@ int book(){
             system("cls");
             print(1);
             if(confirm == "yes"){
+                if (stoi(info[info_table[flight_number]][empty]) > 0) {
+                    info[info_table[flight_number]][empty] = to_string(stoi(info[info_table[flight_number]][empty]) - 1);
+                } else {
+                    cout << "No available seats" << endl;
+                    bfs_find_cheapest_route(info[info_table[flight_number]][from], info[info_table[flight_number]][to]);
+                    return 0;
+                }
                 ticket.push_back(flight_number);
                 system("cls");
                 print(1);
@@ -69,6 +76,46 @@ int book(){
         }
     }
     return 0;
+}
+
+void bfs_find_cheapest_route(string& start, string& end) {
+    unordered_map<string, int> min_price;
+    unordered_map<string, string> parent;
+    queue<string> q;
+    q.push(start);
+    min_price[start] = 0;
+    while (!q.empty()) {
+        string current = q.front();
+        q.pop();
+        for (const auto& row : info) {
+            if (row[from] == current && stoi(row[empty]) > 0) {
+                string next = row[to];
+                int price = stoi(row[price]);
+                if (min_price.find(next) == min_price.end() || min_price[next] > min_price[current] + price) {
+                    min_price[next] = min_price[current] + price;
+                    parent[next] = current;
+                    q.push(next);
+                }
+            }
+        }
+    }
+
+    if(min_price.find(end) == min_price.end()){
+        cout << "No available route from " << start << " to " << end << endl;
+    }
+    else{
+        cout << "Suggest route from " << start << " to " << end << " with price " << min_price[end] << ":" << endl;
+        vector<string> route;
+        for(string at = end; at != start; at = parent[at]){
+            route.push_back(at);
+        }
+        route.push_back(start);
+        reverse(route.begin(), route.end());
+        for(const string& location : route){
+            cout << location << " ";
+        }
+        cout << endl;
+    }
 }
 
 int check_in(bool &ret_flag, fstream& password_file, string& password){
@@ -140,6 +187,42 @@ void delete_operation(){
                 shell_sort_info();
                 system("cls");
                 print(0);
+                cout << "info deleted" << endl;
+                break;
+            }
+            else if(confirm == "no"){
+                cout << "deletion cancelled" << endl;
+                break;
+            }
+            else cout << "Invalid input, please enter again (yes/no):" << endl;
+        }
+    }
+}
+
+void delete_user(){
+    while(1){
+        cout << "Enter flight number to delete(\"quit\" to break):" << endl;
+        string flight_number;
+        cin >> flight_number;
+        system("cls");
+        print(1);
+        if(flight_number == "quit") break;
+        if(info_table.find(flight_number) == info_table.end()){
+            cout << "The flight does not exist" << endl;
+            continue;
+        }
+        cout << "Are you sure to delete? (yes/no)" << endl;
+        string confirm;
+        while(1){
+            cin >> confirm;
+            system("cls");
+            print(1);
+            if(confirm == "yes"){
+                info.erase(info.begin() + info_table[flight_number]);
+                info_table.erase(flight_number);
+                shell_sort_info();
+                system("cls");
+                print(1);
                 cout << "info deleted" << endl;
                 break;
             }
@@ -274,6 +357,8 @@ void help_user(){
     cout << "quit: quit user mode" << endl;
     cout << "save: save the information" << endl;
     cout << "book: book a flight" << endl;
+    cout << "destination: show all destinations" << endl;
+    cout << "delete: delete a ticket" << endl;
 }
 
 void modify(int &ret_flag){
@@ -358,7 +443,7 @@ void modify(int &ret_flag){
     }
 }
 
-void modify_particular(std::__cxx11::string &target, std::__cxx11::string &modify_info, int &ret_flag, int mode){
+void modify_particular(string &target, string &modify_info, int &ret_flag, int mode){
     if(target == "from" || target == "to" || target == "getoff" || target == "arrive" || target == "discount" || target == "price" || target == "empty"){
         if(mode == 1 && target != "empty"){
             ret_flag = 3;
@@ -670,9 +755,9 @@ int save(int mode){
     information_file.close();
     if(mode == 1){
         fstream user_file;
-        user_file.open(ticket[username] + ".txt", ios::out | ios::trunc);
+        user_file.open(id_number + ".txt", ios::out | ios::trunc);
         if(!user_file.is_open()){
-            cout << "Could not open file: " + ticket[username] + ".txt";
+            cout << "Could not open file: " + id_number + ".txt";
             return 1;
         }
         for(const auto &row : ticket){
@@ -706,7 +791,6 @@ int user(bool &root_ret_flag){
     root_ret_flag = true;
     bool ret_flag;
     cout << "Please enter your ID number:" << endl;
-    string id_number;
     cin >> id_number;
     system("cls");
     fstream user_file;
@@ -784,6 +868,7 @@ int user(bool &root_ret_flag){
             print(1);
             print_flight(start);
         }
+        else if(cmd == "delete") delete_user();
         else{
             cout << "Invalid command" << endl;
             continue;

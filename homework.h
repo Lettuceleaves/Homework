@@ -6,13 +6,18 @@
 #include <iomanip>
 #include <algorithm>
 #include <set>
+#include <queue>
 using namespace std;
 
 int book();
 
-int check_in(bool &retFlag, fstream &password_file, string &password);
+void bfs_find_cheapest_route(string& start, string& end);
+
+int check_in(bool &ret_flag, fstream &password_file, string &password);
 
 void delete_operation();
+
+void delete_user();
 
 void destination();
 
@@ -28,7 +33,7 @@ void help();
 
 void help_user();
 
-void modify(int &retFlag);
+void modify(int &ret_flag);
 
 void modify_particular(string &target, string &modify_info, int &ret_flag, int mode);
 
@@ -40,9 +45,9 @@ void print_dist();
 
 void print_flight(string start);
 
-int quit(bool &retFlag, int mode);
+int quit(bool &ret_flag, int mode);
 
-int root(bool &retFlag);
+int root(bool &ret_flag);
 
 int save(int mode);
 
