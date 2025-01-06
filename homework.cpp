@@ -8,7 +8,6 @@ unordered_map<string, int> location;
 vector<vector<string>> flight_table;
 vector<vector<int>> dist;
 vector<string> ticket;
-vector<string> booked;
 string id_number;
 int bill_length;
 
@@ -68,7 +67,7 @@ int book(){
                 save_deal(flight_number, 1);
                 system("cls");
                 print(1);
-                cout << "booked" << endl;
+                cout << "ticket" << endl;
                 return 0;
             }
             else if(confirm == "no"){
@@ -221,18 +220,18 @@ void delete_user(){
             system("cls");
             print(1);
             if(confirm == "yes"){
-                auto it = find(booked.begin(), booked.end(), flight_number);
-                if (it != booked.end()) {
-                    booked.erase(it);
+                auto it = find(ticket.begin(), ticket.end(), flight_number);
+                if (it != ticket.end()) {
+                    ticket.erase(it);
                     save_deal(flight_number, 0);
                     shell_sort_info();
                     system("cls");
                     print(1);
                     cout << "info deleted" << endl;
-                    return 0;
+                    return;
                 } else {
-                    cout << "The ticket does not exist in your bookings" << endl;
-                    return 0;
+                    cout << "The ticket does not exist" << endl;
+                    return;
                 }
             }
             else if(confirm == "no"){
@@ -622,7 +621,19 @@ void print(int mode){
         cout << endl;
         cout << "+--------+------+-------+-------+-------+--------+-------+-------+" << endl;
     }
-    if(mode == 1) print_dist();
+    if(mode == 1){
+        print_dist();
+        cout << endl << "Tickets:" << endl;
+        if(ticket.empty()){
+            cout << "No tickets" << endl << endl;
+        }
+        else{
+            for(const auto& t : ticket){
+                cout << t << endl;
+            }
+            cout << endl;
+        }
+    }
 }
 
 void print_dist(){
@@ -675,9 +686,12 @@ int quit(bool &ret_flag, int mode){
                     system("cls");
                     print(mode);
                     if(confirm == "yes") continue;
-                    else{              
+                    else if(confirm == "no"){              
                         ret_flag = false;
                         return 0;
+                    }
+                    else{
+                        cout << "Invalid input, please enter again (yes/no):" << endl;
                     }
                 }
                 else{
@@ -910,7 +924,7 @@ int user(bool &root_ret_flag){
     string line;
     while (getline(user_file, line)) {
         if (info_table.find(line) != info_table.end()) {
-            booked.push_back(line);
+            ticket.push_back(line);
         } else {
             cout << "System Error: Invalid flight number found in user file." << endl;
             return 1;
@@ -943,7 +957,7 @@ int user(bool &root_ret_flag){
             }
         }
         else if(cmd == "save"){
-            while(!save(1)){
+            while(save(1)){
                 cout << "save failed" << endl;
                 cout << "Try to save again? (yes/no)" << endl;
                 string confirm;
