@@ -359,6 +359,8 @@ void help(){
     cout << "password: change the password" << endl;
     cout << "insert: insert new information" << endl;
     cout << "modify: modify information" << endl;
+    cout << "delete: delete information" << endl;
+    cout << "template: show the template" << endl;
 }
 
 void help_user(){
@@ -539,6 +541,10 @@ void modify_particular(string &target, string &modify_info, int &ret_flag, int m
         else if(target == "discount") info[part_index][5] = new_value;
         else if(target == "price") info[part_index][6] = new_value;
         else if(target == "empty") info[part_index][7] = new_value;
+        else{
+            cout << "Invalid part specified" << endl;
+            ret_flag = 3;
+        }
         system("cls");
         print(0);
         cout << "Modification successful" << endl;
@@ -567,7 +573,8 @@ int password_block(string &password, fstream &password_file, bool &ret_flag){
         cout << "New a password:" << endl;
         while(true){
             cout << "Enter new password:" << endl;
-            string new_password1, new_password2;
+            string new_password1;
+            string new_password2;
             cin >> new_password1;
             system("cls");
             print(0);
@@ -771,7 +778,7 @@ int save(int mode){
     for(const auto &row : info){
         for(int i = 0; i < 8; i++){
             information_file << row[i];
-            if (i < 7) information_file << "-";
+            if(i < 7) information_file << "-";
         }
         information_file << endl;
     }
@@ -785,22 +792,22 @@ int save(int mode){
         }
         fstream deal_file;
         deal_file.open("deal.txt", ios::in | ios::out);
-        if (!deal_file.is_open()) {
+        if(!deal_file.is_open()){
             cout << "Could not open file: deal.txt";
             return 1;
         }
         vector<string> lines;
         string line;
-        while (getline(deal_file, line)) {
+        while(getline(deal_file, line)){
             lines.push_back(line);
         }
         deal_file.close();
         deal_file.open("deal.txt", ios::out | ios::trunc);
-        if (!deal_file.is_open()) {
+        if(!deal_file.is_open()){
             cout << "Could not open file: deal.txt";
             return 1;
         }
-        for (int i = 0; i < lines.size(); ++i) {
+        for(int i = 0; i < lines.size(); ++i){
             if (i >= bill_length && lines[i].find("not completed") != string::npos) {
             lines[i].replace(lines[i].find("not completed"), 13, "completed");
             }
@@ -842,9 +849,7 @@ int save_deal(string f, int mode){
     int count = 0;
     do{
         new_deal = "";
-        for(int i = 0; i < 10; ++i){
-            new_deal += 'A' + rand() % 26;
-        }
+        for(int i = 0; i < 10; ++i) new_deal += 'A' + rand() % 26;
         if(count > 100000000){
             cout << "System Error, Could not generate a new deal" << endl;
             return 1;
@@ -922,10 +927,11 @@ int user(bool &root_ret_flag){
         }
     }
     string line;
-    while (getline(user_file, line)) {
-        if (info_table.find(line) != info_table.end()) {
+    while(getline(user_file, line)){
+        if(info_table.find(line) != info_table.end()){
             ticket.push_back(line);
-        } else {
+        }
+        else{
             cout << "System Error: Invalid flight number found in user file." << endl;
             return 1;
         }
@@ -972,9 +978,7 @@ int user(bool &root_ret_flag){
                 }
             }
         }
-        else if(cmd == "book"){
-            if(book()) return 1;
-        }
+        else if(cmd == "book") if(book()) return 1;
         else if(cmd == "help") help_user();
         else if(cmd == "destination"){
             destination();
