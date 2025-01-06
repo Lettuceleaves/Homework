@@ -8,6 +8,7 @@ unordered_map<string, int> location;
 vector<vector<string>> flight_table;
 vector<vector<int>> dist;
 vector<string> ticket;
+vector<string> booked;
 string id_number;
 int bill_length;
 
@@ -800,30 +801,42 @@ int save(int mode){
 int save_deal(string f, int mode){
     fstream deal_file;
     deal_file.open("deal.txt", ios::in);
-    if (!deal_file.is_open()) {
+    if(!deal_file.is_open()){
         cout << "Could not open file: deal.txt";
         return 1;
     }
     string deal_string;
     set<string> deal_set;
-    while (deal_file >> deal_string) {
+    while(deal_file >> deal_string){
         istringstream iss(deal_string);
         string first_word;
         iss >> first_word;
         deal_set.insert(first_word);
     }
+    deal_file.close();
+    deal_file.open("deal.txt", ios::out | ios::app);
+    if(!deal_file.is_open()){
+        cout << "Could not open file: deal.txt";
+        return 1;
+    }
     string new_deal;
-    do {
+    int count = 0;
+    do{
         new_deal = "";
-        for (int i = 0; i < 10; ++i) {
+        for(int i = 0; i < 10; ++i){
             new_deal += 'A' + rand() % 26;
         }
-    } while (deal_set.find(new_deal) != deal_set.end());
+        if(count > 100000000){
+            cout << "System Error, Could not generate a new deal" << endl;
+            return 1;
+        }
+    }
+    while(deal_set.find(new_deal) != deal_set.end());
     deal_file << new_deal;
     time_t now = time(0);
     tm *ltm = localtime(&now);
     deal_file << " " << id_number << " " << f << " " << info[info_table[f]][from] << " " << info[info_table[f]][to] << " " << info[info_table[f]][getoff] << " " << info[info_table[f]][arrive] << " " << info[info_table[f]][price] << " " 
-              << 1900 + ltm->tm_year << "-" << 1 + ltm->tm_mon << "-" << ltm->tm_mday;
+              << 1900 + ltm->tm_year << "-" << 1 + ltm->tm_mon << "-" << ltm->tm_mday << " ";
     if(mode == 1){
         deal_file << "build" << " ";
     }
@@ -876,15 +889,27 @@ int user(bool &root_ret_flag){
                     continue;
                 }
             }
+            else break;
+        }
+    }
+    if(user_file.peek() != ifstream::traits_type::eof()) {
+        string line;
+        while(getline(user_file, line)){
+            if(line.length() != 4 || info_table.find(line) == info_table.end()){
+                cout << "Error, please get in touch with assistance" << endl;
+                return 1;
+            }
+            else ticket.push_back(line);
         }
     }
     string line;
-    while(getline(user_file, line)){
-        if(line.length() != 4 || info_table.find(line) == info_table.end()){
-            cout << "error, please get in touch with assistance" << endl;
+    while (getline(user_file, line)) {
+        if (info_table.find(line) != info_table.end()) {
+            booked.push_back(line);
+        } else {
+            cout << "System Error: Invalid flight number found in user file." << endl;
             return 1;
         }
-        else ticket.push_back(line);
     }
     user_file.close();
     floyd(info.size());
