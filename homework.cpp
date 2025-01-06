@@ -221,14 +221,19 @@ void delete_user(){
             system("cls");
             print(1);
             if(confirm == "yes"){
-                info.erase(info.begin() + info_table[flight_number]);
-                info_table.erase(flight_number);
-                save_deal(flight_number, 0);
-                shell_sort_info();
-                system("cls");
-                print(1);
-                cout << "info deleted" << endl;
-                break;
+                auto it = find(booked.begin(), booked.end(), flight_number);
+                if (it != booked.end()) {
+                    booked.erase(it);
+                    save_deal(flight_number, 0);
+                    shell_sort_info();
+                    system("cls");
+                    print(1);
+                    cout << "info deleted" << endl;
+                    return 0;
+                } else {
+                    cout << "The ticket does not exist in your bookings" << endl;
+                    return 0;
+                }
             }
             else if(confirm == "no"){
                 cout << "deletion cancelled" << endl;
