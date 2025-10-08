@@ -8,7 +8,6 @@ public class Prime {
             isPrime[i] = true;
         }
         for (int p = 2; p * p <= limit; p++) {
-            // 如果 isPrime[p] 仍为 true，则 p 是素数
             if (isPrime[p]) {
                 for (int i = p * p; i <= limit; i += p) {
                     isPrime[i] = false;
